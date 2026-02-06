@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS Float Layout</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+        }
+
+        /* ===== Main Container ===== */
+        .container {
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        /* ===== Left Section ===== */
+        .left-section {
+            float: left;
+            width: 60%;
+            background-color: #dff9fb;
+            padding: 20px;
+        }
+
+        /* ===== Right Section ===== */
+        .right-section {
+            float: right;
+            width: 40%;
+            background-color: #f6e58d;
+            padding: 20px;
+        }
+
+        /* ===== Content Boxes in Left ===== */
+        .content-box {
+            background-color: #ffffff;
+            margin-bottom: 15px;
+            padding: 15px;
+            overflow: hidden; /* Prevent float issues inside */
+        }
+
+        .content-box img {
+            float: left;
+            width: 80px;
+            height: 80px;
+            margin-right: 15px;
+        }
+
+        /* ===== Clear Floats ===== */
+        .clear {
+            clear: both;
+        }
+
+        /* ===== Right Section Box ===== */
+        .info-box {
+            background-color: #ffffff;
+            padding: 20px;
+        }
+
+        .info-box a {
+            color: #130f40;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Left Section -->
+        <div class="left-section">
+
+            <div class="content-box">
+                <img src="https://via.placeholder.com/80" alt="Image">
+                <p>This is the first content box with image and text.</p>
+            </div>
+
+            <div class="content-box">
+                <img src="https://via.placeholder.com/80" alt="Image">
+                <p>This is the second content box with image and text.</p>
+            </div>
+
+            <div class="content-box">
+                <img src="https://via.placeholder.com/80" alt="Image">
+                <p>This is the third content box with image and text.</p>
+            </div>
+
+        </div>
+
+        <!-- Right Section -->
+        <div class="right-section">
+            <div class="info-box">
+                <h3>University Information</h3>
+                <p>
+                    Visit the official website of the university for more details.
+                </p>
+                <a href="https://www.uet.edu.pk" target="_blank">
+                    Go to University Website
+                </a>
+            </div>
+        </div>
+
+        <!-- Clear Float -->
+        <div class="clear"></div>
+
+    </div>
+
+</body>
+</html>
