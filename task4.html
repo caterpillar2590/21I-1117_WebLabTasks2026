@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS Positioning Demo</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* ===== Sticky Navigation Bar (Flexbox) ===== */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        /* ===== Main Content ===== */
+        .content {
+            padding: 40px;
+            min-height: 1200px; /* To enable scrolling */
+            background-color: #f4f6f8;
+        }
+
+        /* ===== Relative Container ===== */
+        .relative-box {
+            position: relative;
+            width: 400px;
+            height: 200px;
+            background-color: #dfe6e9;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        /* ===== Absolute Element ===== */
+        .absolute-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+
+            background-color: #0984e3;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        /* ===== Fixed Element ===== */
+        .fixed-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+
+            background-color: #e17055;
+            color: white;
+            padding: 15px;
+            border-radius: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sticky Navbar -->
+    <nav class="navbar">
+        <div>MyWebsite</div>
+
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="content">
+
+        <h2>CSS Positioning Example</h2>
+        <p>Scroll down to see sticky and fixed positioning in action.</p>
+
+        <!-- Relative Container -->
+        <div class="relative-box">
+            This box is positioned <strong>relative</strong>.
+
+            <!-- Absolute Element -->
+            <div class="absolute-box">
+                Absolute Element
+            </div>
+        </div>
+
+        <p>More content here to allow scrolling...</p>
+        <p>More content here to allow scrolling...</p>
+        <p>More content here to allow scrolling...</p>
+        <p>More content here to allow scrolling...</p>
+
+    </div>
+
+    <!-- Fixed Element -->
+    <div class="fixed-box">
+        Fixed
+    </div>
+
+</body>
+</html>
