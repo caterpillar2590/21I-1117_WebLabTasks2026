@@ -1,0 +1,44 @@
+const MAX_CAPACITY = 100;
+let attendees = [];
+function addAttendee(name, email, ticketType) {
+    if (!isFull()) {
+        const attendee = {
+            name: name,
+            email: email,
+            ticketType: ticketType
+        };
+        attendees.push(attendee);
+        console.log(`${name} registered successfully as ${ticketType}.`);
+    } else {
+        console.log("Registration failed: Conference is full.");
+    }
+}
+function isFull() {
+    return attendees.length >= MAX_CAPACITY;
+}
+function listAttendees() {
+    console.log("---- Attendee List ----");
+    attendees.forEach((attendee, index) => {
+        console.log(
+            `${index + 1}. Name: ${attendee.name}, Email: ${attendee.email}, Ticket: ${attendee.ticketType}`
+        );
+    });
+}
+function countByTicketType(type) {
+    return attendees.filter(attendee => attendee.ticketType === type).length;
+}
+addAttendee("Jibran Malik", "jibran@example.com", "General");
+addAttendee("Saadullah", "Saadullah@example.com", "VIP");
+addAttendee("Laiba ", "Laiba@example.com", "Speaker");
+addAttendee("Hina Malik", "hina@example.com", "VIP");
+
+// Listing attendees
+listAttendees();
+
+// Counting by ticket type
+console.log("VIP Count:", countByTicketType("VIP"));
+console.log("General Count:", countByTicketType("General"));
+console.log("Speaker Count:", countByTicketType("Speaker"));
+
+// Checking if full
+console.log("Is Conference Full?", isFull());
