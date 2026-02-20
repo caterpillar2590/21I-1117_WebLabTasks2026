@@ -39,10 +39,6 @@ function checkPassword(password) {
         return "Strong";
     }
 }
-
-
-// -------- Example Tests --------
-
 console.log(checkPassword("abc"));            // Weak
 console.log(checkPassword("abc12345"));       // Medium
 console.log(checkPassword("Abc12345@"));      // Strong
