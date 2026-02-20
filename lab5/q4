@@ -1,0 +1,25 @@
+// A) Average
+const getAverage = (arr) => {
+    let sum = arr.reduce((total, num) => total + num, 0);
+    return sum / arr.length;
+};
+console.log(getAverage([10, 20, 30]));
+
+
+function findLongestWord(str) {
+    let words = str.split(" ");
+    return words.reduce((a, b) => {
+        return a.length > b.length ? a : b;
+    });
+}
+console.log(findLongestWord("JavaScript is very powerful language"));
+
+// C) Pass Check
+const checkPass = (marks) => {
+    if (marks.filter(m => m >= 50).length > 0)
+        return "Pass";
+    else
+        return "Fail";
+};
+console.log(checkPass([20, 30, 40]));
+console.log(checkPass([20, 55, 40]));
