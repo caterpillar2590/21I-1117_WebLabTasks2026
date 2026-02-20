@@ -1,0 +1,40 @@
+function cleanUsername(name) {
+    return name
+        .trim()                       
+        .toLowerCase()                
+        .replace(/\s+/g, "_");        
+}
+
+
+function validateUsername(name) {
+
+    if (name.length < 5 || name.length > 20) {
+        return false;
+    }
+    let firstChar = name.charAt(0);
+    if (!(firstChar >= 'a' && firstChar <= 'z')) {
+        return false;
+    }
+
+    
+    let valid = name.replace(/[a-z0-9_]/g, "");
+    if (valid.length > 0) {
+        return false;
+    }
+
+    return true;
+}
+
+
+
+
+let input = " Agha_Ahsan123";
+
+let cleaned = cleanUsername(input);
+console.log("Cleaned Username:", cleaned);
+
+if (validateUsername(cleaned)) {
+    console.log("Username is valid.");
+} else {
+    console.log("Username is invalid.");
+}
