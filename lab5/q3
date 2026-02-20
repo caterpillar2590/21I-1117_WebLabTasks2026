@@ -1,0 +1,65 @@
+// Movie Collection Manager
+
+// Array to store movies
+let movieCollection = [];
+
+// Function to add a new movie
+function addMovie(title, director, genre, year) {
+    const movie = {
+        title: title,
+        director: director,
+        genre: genre,
+        year: year
+    };
+    movieCollection.push(movie);
+    console.log(`"${title}" added successfully.`);
+}
+
+// Function to list all movies (formatted using map and join)
+function listMovies() {
+    if (movieCollection.length === 0) {
+        console.log("No movies in collection.");
+        return;
+    }
+
+    const formattedList = movieCollection
+        .map((movie, index) => 
+            `${index + 1}. ${movie.title} (${movie.year})\n   Director: ${movie.director}\n   Genre: ${movie.genre}`
+        )
+        .join("\n\n");
+
+    console.log("---- Movie Collection ----");
+    console.log(formattedList);
+}
+
+// Function to search movies by director (case-insensitive)
+function searchByDirector(director) {
+    return movieCollection.filter(movie =>
+        movie.director.toLowerCase() === director.toLowerCase()
+    );
+}
+
+// Function to search movies by genre (case-insensitive)
+function searchByGenre(genre) {
+    return movieCollection.filter(movie =>
+        movie.genre.toLowerCase() === genre.toLowerCase()
+    );
+}
+
+
+// Adding movies
+addMovie("Inception", "Christopher Nolan", "Sci-Fi", 2010);
+addMovie("Interstellar", "Christopher Nolan", "Sci-Fi", 2014);
+addMovie("The Dark Knight", "Christopher Nolan", "Action", 2008);
+addMovie("Titanic", "James Cameron", "Romance", 1997);
+
+// Listing all movies
+listMovies();
+
+// Searching by director
+console.log("Movies by Christopher Nolan:");
+console.log(searchByDirector("christopher nolan"));
+
+// Searching by genre
+console.log("Sci-Fi Movies:");
+console.log(searchByGenre("sci-fi"));
