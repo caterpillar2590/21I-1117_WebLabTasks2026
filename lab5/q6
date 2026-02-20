@@ -1,0 +1,43 @@
+
+function countWords(message) {
+    return message.trim().split(/\s+/).length;
+}
+function countCharacters(message) {
+    return message.length;
+}
+function containsUrgent(message) {
+    let lowerMsg = message.toLowerCase();
+    let keywords = ["urgent", "asap", "immediately", "important"];
+    
+    for (let word of keywords) {
+        if (lowerMsg.includes(word)) {
+            return "Yes";
+        }
+    }
+    return "No";
+}
+
+function isShouting(message) {
+    let lettersOnly = message.replace(/[^a-zA-Z]/g, "");
+    
+    if (lettersOnly.length === 0) return "No";
+    
+    let upperCount = 0;
+    
+    for (let char of lettersOnly) {
+        if (char === char.toUpperCase()) {
+            upperCount++;
+        }
+    }
+    
+    let percentage = (upperCount / lettersOnly.length) * 100;
+    
+    return percentage > 70 ? "Yes" : "No";
+}
+
+let message = "Sir I submitted the Assignment today!!!";
+
+console.log("Words:", countWords(message));
+console.log("Characters:", countCharacters(message));
+console.log("Contains Urgent Word:", containsUrgent(message));
+console.log("Shouting:", isShouting(message));
