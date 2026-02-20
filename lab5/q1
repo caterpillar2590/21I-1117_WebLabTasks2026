@@ -1,0 +1,38 @@
+
+let stepsData = [4500, 6200, 5800, 7100, 4900, 8300, 6700];
+
+
+function addSteps(dayIndex, steps) {
+    if (dayIndex >= 0 && dayIndex < stepsData.length) {
+        stepsData[dayIndex] = steps;
+    } else {
+        console.log("Invalid day index!");
+    }
+}
+
+function getHighestSteps() {
+    return Math.max(...stepsData);
+}
+
+function getLowestSteps() {
+    return Math.min(...stepsData);
+}
+
+function getAverageSteps() {
+    let total = stepsData.reduce((sum, steps) => sum + steps, 0);
+    return total / stepsData.length;
+}
+
+function getAboveAverageDays() {
+    let average = getAverageSteps();
+    return stepsData.filter(steps => steps > average);
+}
+console.log("Weekly Steps Data:", stepsData);
+console.log("Highest Steps:", getHighestSteps());
+console.log("Lowest Steps:", getLowestSteps());
+console.log("Average Steps:", getAverageSteps());
+console.log("Above Average Step Counts:", getAboveAverageDays());
+
+// Example Update
+addSteps(2, 7500);
+console.log("Updated Weekly Steps Data:", stepsData);
