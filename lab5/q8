@@ -1,0 +1,48 @@
+// Password Strength Checker
+
+function checkPassword(password) {
+
+    let score = 0;
+
+    // Condition 1: Length ≥ 8
+    if (password.length >= 8) {
+        score++;
+    }
+
+    // Condition 2: At least 1 Uppercase letter
+    if (password.match(/[A-Z]/)) {
+        score++;
+    }
+
+    // Condition 3: At least 1 Lowercase letter
+    if (password.match(/[a-z]/)) {
+        score++;
+    }
+
+    // Condition 4: At least 1 Number
+    if (password.match(/[0-9]/)) {
+        score++;
+    }
+
+    // Condition 5: At least 1 Special Character (@ # $ %)
+    let specialChars = ["@", "#", "$", "%"];
+    if (specialChars.some(char => password.includes(char))) {
+        score++;
+    }
+
+    // Strength Decision
+    if (score <= 2) {
+        return "Weak";
+    } else if (score <= 4) {
+        return "Medium";
+    } else {
+        return "Strong";
+    }
+}
+
+
+// -------- Example Tests --------
+
+console.log(checkPassword("abc"));            // Weak
+console.log(checkPassword("abc12345"));       // Medium
+console.log(checkPassword("Abc12345@"));      // Strong
