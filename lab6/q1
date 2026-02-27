@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration Form</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #4e73df, #1cc88a);
+        margin: 0;
+    }
+
+    .container {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 2px solid #ccc;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    input.valid {
+        border-color: green;
+    }
+
+    input.invalid {
+        border-color: red;
+    }
+
+    small {
+        color: red;
+        font-size: 13px;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4e73df;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:disabled {
+        background-color: gray;
+        cursor: not-allowed;
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+        .container {
+            padding: 15px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Registration Form</h2>
+
+    <div class="form-group">
+        <input type="text" id="name" placeholder="Name">
+        <small id="nameError"></small>
+    </div>
+
+    <div class="form-group">
+        <input type="text" id="email" placeholder="Email">
+        <small id="emailError"></small>
+    </div>
+
+    <div class="form-group">
+        <input type="password" id="password" placeholder="Password">
+        <small id="passwordError"></small>
+    </div>
+
+    <div class="form-group">
+        <input type="password" id="confirm" placeholder="Confirm Password">
+        <small id="confirmError"></small>
+    </div>
+
+    <div class="form-group">
+        <input type="number" id="age" placeholder="Age">
+        <small id="ageError"></small>
+    </div>
+
+    <button id="submitBtn" disabled>Register</button>
+</div>
+
+<script>
+const nameInput = document.getElementById("name");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const confirmInput = document.getElementById("confirm");
+const ageInput = document.getElementById("age");
+const submitBtn = document.getElementById("submitBtn");
+
+function validateName() {
+    if (nameInput.value.trim().length >= 3) {
+        setValid(nameInput, "nameError");
+        return true;
+    } else {
+        setInvalid(nameInput, "nameError", "Minimum 3 characters required");
+        return false;
+    }
+}
+
+function validateEmail() {
+    if (emailInput.value.includes("@") && emailInput.value.includes(".")) {
+        setValid(emailInput, "emailError");
+        return true;
+    } else {
+        setInvalid(emailInput, "emailError", "Enter valid email");
+        return false;
+    }
+}
+
+function validatePassword() {
+    const hasNumber = /\d/.test(passwordInput.value);
+    if (passwordInput.value.length >= 6 && hasNumber) {
+        setValid(passwordInput, "passwordError");
+        return true;
+    } else {
+        setInvalid(passwordInput, "passwordError", "Min 6 chars + 1 number");
+        return false;
+    }
+}
+
+function validateConfirm() {
+    if (confirmInput.value === passwordInput.value && confirmInput.value !== "") {
+        setValid(confirmInput, "confirmError");
+        return true;
+    } else {
+        setInvalid(confirmInput, "confirmError", "Passwords must match");
+        return false;
+    }
+}
+
+function validateAge() {
+    const age = parseInt(ageInput.value);
+    if (age >= 18 && age <= 60) {
+        setValid(ageInput, "ageError");
+        return true;
+    } else {
+        setInvalid(ageInput, "ageError", "Age must be 18–60");
+        return false;
+    }
+}
+
+function setValid(input, errorId) {
+    input.classList.add("valid");
+    input.classList.remove("invalid");
+    document.getElementById(errorId).textContent = "";
+}
+
+function setInvalid(input, errorId, message) {
+    input.classList.add("invalid");
+    input.classList.remove("valid");
+    document.getElementById(errorId).textContent = message;
+}
+
+function checkFormValidity() {
+    if (
+        validateName() &&
+        validateEmail() &&
+        validatePassword() &&
+        validateConfirm() &&
+        validateAge()
+    ) {
+        submitBtn.disabled = false;
+    } else {
+        submitBtn.disabled = true;
+    }
+}
+
+nameInput.addEventListener("input", () => {
+    validateName();
+    checkFormValidity();
+});
+
+emailInput.addEventListener("input", () => {
+    validateEmail();
+    checkFormValidity();
+});
+
+passwordInput.addEventListener("input", () => {
+    validatePassword();
+    validateConfirm();
+    checkFormValidity();
+});
+
+confirmInput.addEventListener("input", () => {
+    validateConfirm();
+    checkFormValidity();
+});
+
+ageInput.addEventListener("input", () => {
+    validateAge();
+    checkFormValidity();
+});
+</script>
+
+</body>
+</html>
