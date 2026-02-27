@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Counter Application</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+/* Slight soft card effect */
+.card-shadow {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+</style>
+</head>
+
+<body class="bg-gray-200 min-h-screen flex flex-col items-center">
+
+    <!-- Top Text -->
+    <h1 class="text-sky-500 font-bold text-lg mt-6">
+        INITIALLY SET TO 0
+    </h1>
+
+    <!-- Main Container -->
+    <div class="bg-gray-100 w-full max-w-2xl mt-6 py-10 flex justify-center">
+
+        <!-- Card -->
+        <div class="bg-white rounded-xl p-8 text-center card-shadow w-80">
+
+            <h2 class="text-2xl font-bold text-gray-700 mb-6">
+                Counter Application
+            </h2>
+
+            <!-- Counter Display -->
+            <div id="count"
+                 class="text-5xl text-blue-500 font-semibold mb-6">
+                0
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-center gap-4">
+                <button onclick="increment()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                    Increment
+                </button>
+
+                <button onclick="decrement()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                    Decrement
+                </button>
+
+                <button onclick="resetCounter()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                    Reset
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+let count = 0;
+const display = document.getElementById("count");
+
+function increment() {
+    count++;
+    display.textContent = count;
+}
+
+function decrement() {
+    count--;
+    display.textContent = count;
+}
+
+function resetCounter() {
+    count = 0;
+    display.textContent = count;
+}
+</script>
+
+</body>
+</html>
