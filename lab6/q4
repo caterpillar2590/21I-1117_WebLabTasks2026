@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo List - Tailwind + Custom CSS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+.task-item {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.delete-btn:hover {
+    transform: scale(1.2);
+}
+.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+</style>
+</head>
+
+<body class="bg-gradient-to-r from-indigo-500 to-purple-600 min-h-screen flex items-center justify-center">
+
+<div class="bg-white w-[400px] max-w-[95%] p-6 rounded-2xl shadow-2xl">
+
+    <h2 class="text-2xl font-bold text-center mb-5">Todo List Manager</h2>
+    <div class="flex gap-3">
+        <input 
+            type="text" 
+            id="taskInput" 
+            placeholder="Enter a task..."
+            class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        >
+        <button 
+            onclick="addTask()" 
+            class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+            Add
+        </button>
+    </div>
+    <ul id="taskList" class="mt-6 space-y-3"></ul>
+
+</div>
+
+<script>
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const taskText = input.value.trim();
+    if (taskText === "") {
+        alert("Please enter a task!");
+        return;
+    }
+
+    const li = document.createElement("li");
+    li.className = "task-item flex justify-between items-center bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition";
+    const span = document.createElement("span");
+    span.textContent = taskText;
+    span.className = "cursor-pointer";
+    span.onclick = function() {
+        span.classList.toggle("completed");
+    };
+    const deleteBtn = document.createElement("button");
+    deleteBtn.innerHTML = "&times;";
+    deleteBtn.className = "delete-btn text-red-500 text-xl font-bold transition";
+    deleteBtn.onclick = function() {
+        li.remove();
+    };
+
+    li.appendChild(span);
+    li.appendChild(deleteBtn);
+    document.getElementById("taskList").appendChild(li);
+
+    input.value = "";
+}
+document.getElementById("taskInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        addTask();
+    }
+});
+</script>
+
+</body>
+</html>
