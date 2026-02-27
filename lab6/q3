@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsive Navbar with Theme</title>
+
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #222;
+    --nav-bg: #ffffff;
+}
+
+.dark {
+    --bg-color: #222;
+    --text-color: #f8f9fa;
+    --nav-bg: #111827;
+}
+
+/* Apply variables */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.navbar {
+    background-color: var(--nav-bg);
+    transition: background-color 0.4s ease;
+}
+
+
+#mobileMenu {
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    overflow: hidden;
+}
+
+</style>
+</head>
+
+<body class="min-h-screen">
+
+<header class="navbar shadow-md fixed w-full z-50">
+    <nav class="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
+
+        <!-- Logo -->
+        <div class="text-xl font-bold">
+            MyBrand
+        </div>
+
+        <!-- Desktop Links -->
+        <ul class="hidden md:flex space-x-8 font-medium">
+            <li><a href="#" class="hover:text-blue-500 transition">Home</a></li>
+            <li><a href="#" class="hover:text-blue-500 transition">About</a></li>
+            <li><a href="#" class="hover:text-blue-500 transition">Services</a></li>
+            <li><a href="#" class="hover:text-blue-500 transition">Contact</a></li>
+        </ul>
+
+        <!-- Right Side Controls -->
+        <div class="flex items-center space-x-4">
+
+            <!-- Hamburger (Mobile Only) -->
+            <button id="hamburger" class="md:hidden text-2xl focus:outline-none">
+                ☰
+            </button>
+
+            <!-- Theme Toggle -->
+            <button id="themeToggle" 
+                class="px-3 py-1 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
+                🌙
+            </button>
+
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden max-h-0 opacity-0">
+        <ul class="flex flex-col space-y-4 px-6 py-4 font-medium">
+            <li><a href="#" class="hover:text-blue-500 transition">Home</a></li>
+            <li><a href="#" class="hover:text-blue-500 transition">About</a></li>
+            <li><a href="#" class="hover:text-blue-500 transition">Services</a></li>
+            <li><a href="#" class="hover:text-blue-500 transition">Contact</a></li>
+        </ul>
+    </div>
+</header>
+
+<section class="pt-32 text-center px-6">
+    <h1 class="text-4xl md:text-5xl font-bold mb-6">
+        Responsive Navigation with Theme Switcher
+    </h1>
+    <p class="max-w-2xl mx-auto mb-6 text-lg">
+        This hero section demonstrates light and dark mode styling. 
+        Resize the window to see the responsive navbar in action.
+    </p>
+    <button class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+        Get Started
+    </button>
+</section>
+
+<script>
+
+const hamburger = document.getElementById("hamburger");
+const mobileMenu = document.getElementById("mobileMenu");
+
+hamburger.addEventListener("click", () => {
+    if (mobileMenu.classList.contains("max-h-0")) {
+        mobileMenu.classList.remove("max-h-0", "opacity-0");
+        mobileMenu.classList.add("max-h-96", "opacity-100");
+    } else {
+        mobileMenu.classList.add("max-h-0", "opacity-0");
+        mobileMenu.classList.remove("max-h-96", "opacity-100");
+    }
+});
+
+const themeToggle = document.getElementById("themeToggle");
+const htmlElement = document.documentElement;
+
+
+if (localStorage.getItem("theme") === "dark") {
+    htmlElement.classList.add("dark");
+    themeToggle.textContent = "☀️";
+}
+
+
+themeToggle.addEventListener("click", () => {
+    htmlElement.classList.toggle("dark");
+
+    if (htmlElement.classList.contains("dark")) {
+        localStorage.setItem("theme", "dark");
+        themeToggle.textContent = "☀️";
+    } else {
+        localStorage.setItem("theme", "light");
+        themeToggle.textContent = "🌙";
+    }
+});
+
+
+window.addEventListener("resize", () => {
+    if (window.innerWidth >= 768) {
+        mobileMenu.classList.add("max-h-0", "opacity-0");
+    }
+});
+</script>
+
+</body>
+</html>
