@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Profile Card</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .card {
+        background: white;
+        width: 320px;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    .card img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+    }
+
+    .details {
+        display: none;
+        margin-top: 10px;
+        text-align: left;
+    }
+
+    button {
+        margin-top: 15px;
+        padding: 8px 15px;
+        border: none;
+        background: #4CAF50;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    button:hover {
+        background: #388E3C;
+    }
+
+    @media (max-width: 400px) {
+        .card {
+            width: 90%;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <img src="C:\Users\Agha Ahsan\OneDrive\Desktop\WhatsApp Image 2026-02-27 at 9.49.27 AM.jpeg"alt="Student Image">
+    <h2>Agha Muhammad Ahsan Khan</h2>
+    <p><strong>Registration No:</strong> i211117</p>
+    <p><strong>Department:</strong> Software Engineering</p>
+
+    <div class="details" id="moreDetails">
+        <p><strong>Hobbies:</strong> Coding, Cricket, Gaming</p>
+        <p><strong>Skills:</strong> C++, HTML, CSS, JavaScript</p>
+        <p><strong>Email:</strong> ahsan@example.com</p>
+    </div>
+
+    <button onclick="toggleDetails()" id="toggleBtn">Show More</button>
+</div>
+
+<script>
+function toggleDetails() {
+    const details = document.getElementById("moreDetails");
+    const button = document.getElementById("toggleBtn");
+
+    if (details.style.display === "block") {
+        details.style.display = "none";
+        button.textContent = "Show More";
+    } else {
+        details.style.display = "block";
+        button.textContent = "Show Less";
+    }
+}
+</script>
+
+</body>
+</html>
