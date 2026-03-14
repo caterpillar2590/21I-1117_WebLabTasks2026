@@ -1,0 +1,124 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Initial data
+let courses = [
+    { id: 1, name: "Data Structures", seats: 30 },
+    { id: 2, name: "Operating Systems", seats: 25 }
+];
+
+// Helper function to find course by ID
+const findCourseById = (id) => {
+    return courses.find(course => course.id === parseInt(id));
+};
+
+// 1. GET /courses - View all courses
+app.get('/courses', (req, res) => {
+    res.json(courses);
+});
+
+// 2. GET /courses/:id - View specific course
+app.get('/courses/:id', (req, res) => {
+    const course = findCourseById(req.params.id);
+    
+    if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+    }
+    
+    res.json(course);
+});
+
+// 3. POST /courses - Add new course
+app.post('/courses', (req, res) => {
+    const { id, name, seats } = req.body;
+    
+    // Check if all required fields are present
+    if (!id || !name || seats === undefined) {
+        return res.status(400).json({ 
+            error: "Missing required fields. Please provide id, name, and seats" 
+        });
+    }
+    
+    // Check if seats is a valid number
+    if (typeof seats !== 'number' || seats < 0) {
+        return res.status(400).json({ 
+            error: "Seats must be a positive number" 
+        });
+    }
+    
+    // Check if course with same ID already exists
+    const existingCourse = findCourseById(id);
+    if (existingCourse) {
+        return res.status(400).json({ 
+            error: "Course with this ID already exists" 
+        });
+    }
+    
+    const newCourse = { id, name, seats };
+    courses.push(newCourse);
+    res.status(201).json(newCourse);
+});
+
+// 4. PUT /courses/:id - Update course seats
+app.put('/courses/:id', (req, res) => {
+    const course = findCourseById(req.params.id);
+    
+    if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+    }
+    
+    const { seats } = req.body;
+    
+    // Check if seats field is provided
+    if (seats === undefined) {
+        return res.status(400).json({ 
+            error: "Missing seats field" 
+        });
+    }
+    
+    // Check if seats is a valid number
+    if (typeof seats !== 'number' || seats < 0) {
+        return res.status(400).json({ 
+            error: "Seats must be a positive number" 
+        });
+    }
+    
+    course.seats = seats;
+    res.json(course);
+});
+
+// 5. DELETE /courses/:id - Delete course
+app.delete('/courses/:id', (req, res) => {
+    const courseIndex = courses.findIndex(course => course.id === parseInt(req.params.id));
+    
+    if (courseIndex === -1) {
+        return res.status(404).json({ error: "Course not found" });
+    }
+    
+    const deletedCourse = courses[courseIndex];
+    courses.splice(courseIndex, 1);
+    res.json({ 
+        message: "Course deleted successfully", 
+        deletedCourse: deletedCourse 
+    });
+});
+
+// Error handling middleware for unsupported routes
+app.use((req, res) => {
+    res.status(404).json({ error: "Route not found" });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: "Something went wrong!" });
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`University Course Registration API running at http://localhost:${port}`);
+});
