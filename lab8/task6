@@ -1,0 +1,394 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Request counter and time middleware (from previous exercises)
+let requestCount = 0;
+
+const addRequestTime = (req, res, next) => {
+    req.requestTime = new Date().toISOString();
+    next();
+};
+
+const countRequests = (req, res, next) => {
+    requestCount++;
+    console.log(`[${req.requestTime}] Request #${requestCount}: ${req.method} ${req.url}`);
+    next();
+};
+
+app.use(addRequestTime);
+app.use(countRequests);
+
+// Mock resource database
+let resources = {
+    teamMembers: 8,
+    vehicles: 3,
+    equipment: 15
+};
+
+// Animal type check middleware
+const animalTypeCheck = (req, res, next) => {
+    const { animalType } = req.body;
+    const validAnimalTypes = ['bird', 'mammal', 'reptile'];
+    
+    if (!animalType) {
+        req.animalError = "Animal type is required";
+        return next();
+    }
+    
+    if (!validAnimalTypes.includes(animalType.toLowerCase())) {
+        req.animalError = `Invalid animal type. Must be one of: ${validAnimalTypes.join(', ')}`;
+        return next();
+    }
+    
+    // Add animal-specific strategies and precautions
+    req.animalInfo = {
+        type: animalType.toLowerCase(),
+        strategy: getAnimalStrategy(animalType),
+        precautions: getAnimalPrecautions(animalType)
+    };
+    
+    console.log(`Animal Type Check Passed: ${animalType}`);
+    next();
+};
+
+// Helper functions for animal-specific strategies
+const getAnimalStrategy = (animalType) => {
+    const strategies = {
+        bird: "Use quiet approach, prepare net capture, minimize stress",
+        mammal: "Sedation may be required, prepare transport crate, handle with care",
+        reptile: "Use specialized handling equipment, maintain temperature control, avoid sudden movements"
+    };
+    return strategies[animalType.toLowerCase()] || "Standard rescue protocol";
+};
+
+const getAnimalPrecautions = (animalType) => {
+    const precautions = {
+        bird: "Watch for flight response, protect wings, avoid feather damage",
+        mammal: "Check for bites/scratches, monitor vital signs, consider maternal separation stress",
+        reptile: "Watch for defensive strikes, maintain safe distance from head, monitor body temperature"
+    };
+    return precautions[animalType.toLowerCase()] || "Standard safety precautions";
+};
+
+// Severity level check middleware
+const severityLevelCheck = (req, res, next) => {
+    const { severity } = req.body;
+    const validSeverityLevels = ['mild', 'moderate', 'severe'];
+    
+    if (!severity) {
+        req.severityError = "Severity level is required";
+        return next();
+    }
+    
+    if (!validSeverityLevels.includes(severity.toLowerCase())) {
+        req.severityError = `Invalid severity level. Must be one of: ${validSeverityLevels.join(', ')}`;
+        return next();
+    }
+    
+    // Calculate resource requirements based on severity
+    req.severityInfo = {
+        level: severity.toLowerCase(),
+        resourcesRequired: getResourceRequirements(severity),
+        difficulty: getDifficultyLevel(severity),
+        timeEstimate: getTimeEstimate(severity)
+    };
+    
+    console.log(`Severity Level Check Passed: ${severity}`);
+    next();
+};
+
+const getResourceRequirements = (severity) => {
+    const requirements = {
+        mild: { teamMembers: 2, vehicles: 1, equipment: 3 },
+        moderate: { teamMembers: 4, vehicles: 2, equipment: 6 },
+        severe: { teamMembers: 6, vehicles: 3, equipment: 10 }
+    };
+    return requirements[severity.toLowerCase()];
+};
+
+const getDifficultyLevel = (severity) => {
+    const difficulties = {
+        mild: "Low",
+        moderate: "Medium",
+        severe: "High"
+    };
+    return difficulties[severity.toLowerCase()];
+};
+
+const getTimeEstimate = (severity) => {
+    const estimates = {
+        mild: "1-2 hours",
+        moderate: "3-5 hours",
+        severe: "6+ hours"
+    };
+    return estimates[severity.toLowerCase()];
+};
+
+// Resource availability check middleware
+const resourceAvailabilityCheck = (req, res, next) => {
+    const severityInfo = req.severityInfo;
+    
+    if (!severityInfo) {
+        req.resourceError = "Severity information not available";
+        return next();
+    }
+    
+    const required = severityInfo.resourcesRequired;
+    const available = resources;
+    
+    // Check resource availability
+    const missingResources = [];
+    
+    if (available.teamMembers < required.teamMembers) {
+        missingResources.push(`${required.teamMembers - available.teamMembers} more team members`);
+    }
+    
+    if (available.vehicles < required.vehicles) {
+        missingResources.push(`${required.vehicles - available.vehicles} more vehicles`);
+    }
+    
+    if (available.equipment < required.equipment) {
+        missingResources.push(`${required.equipment - available.equipment} more equipment units`);
+    }
+    
+    req.resourceInfo = {
+        available: { ...available },
+        required: { ...required },
+        sufficient: missingResources.length === 0,
+        missingResources: missingResources,
+        resourceStatus: missingResources.length === 0 ? "Sufficient" : "Insufficient"
+    };
+    
+    console.log(`Resource Check: ${req.resourceInfo.sufficient ? 'Sufficient' : 'Insufficient'} resources`);
+    next();
+};
+
+// Mission outcome determination middleware
+const missionOutcomeDetermination = (req, res, next) => {
+    // Check for any errors from previous middleware
+    if (req.animalError || req.severityError || req.resourceError) {
+        return next();
+    }
+    
+    const animalInfo = req.animalInfo;
+    const severityInfo = req.severityInfo;
+    const resourceInfo = req.resourceInfo;
+    
+    // Determine mission outcome based on all factors
+    let outcome = "success";
+    let reason = "";
+    let missionDetails = {};
+    
+    if (!resourceInfo.sufficient) {
+        // Check if mission can be delayed or is unsuccessful
+        if (severityInfo.level === 'severe') {
+            outcome = "unsuccessful";
+            reason = "Insufficient resources for severe situation";
+        } else {
+            outcome = "delayed";
+            reason = `Waiting for resources: ${resourceInfo.missingResources.join(', ')}`;
+        }
+    } else {
+        // Calculate success probability based on factors
+        const successProbability = calculateSuccessProbability(severityInfo.level, animalInfo.type);
+        
+        if (successProbability < 0.5) {
+            outcome = "unsuccessful";
+            reason = "High risk factors despite available resources";
+        } else {
+            outcome = "success";
+            reason = "All conditions favorable for rescue";
+        }
+        
+        missionDetails.successProbability = successProbability;
+    }
+    
+    // Deduct resources for successful or delayed missions
+    if (outcome !== "unsuccessful") {
+        const required = resourceInfo.required;
+        resources.teamMembers -= required.teamMembers;
+        resources.vehicles -= required.vehicles;
+        resources.equipment -= required.equipment;
+    }
+    
+    req.missionOutcome = {
+        outcome,
+        reason,
+        ...missionDetails,
+        animalStrategy: animalInfo.strategy,
+        precautions: animalInfo.precautions,
+        difficulty: severityInfo.difficulty,
+        timeEstimate: severityInfo.timeEstimate
+    };
+    
+    console.log(`Mission Outcome: ${outcome}`);
+    next();
+};
+
+// Helper function to calculate success probability
+const calculateSuccessProbability = (severity, animalType) => {
+    let baseProbability = 0.8;
+    
+    // Adjust based on severity
+    const severityModifiers = {
+        mild: 0.1,
+        moderate: 0,
+        severe: -0.3
+    };
+    
+    // Adjust based on animal type
+    const animalModifiers = {
+        bird: 0.05,
+        mammal: 0,
+        reptile: -0.1
+    };
+    
+    baseProbability += severityModifiers[severity] || 0;
+    baseProbability += animalModifiers[animalType] || 0;
+    
+    return Math.max(0, Math.min(1, baseProbability));
+};
+
+// Error handler middleware
+const errorHandler = (err, req, res, next) => {
+    console.error('Error:', err.stack);
+    
+    // Handle specific error types
+    if (err.type === 'validation') {
+        return res.status(400).json({
+            error: "Validation Error",
+            message: err.message,
+            timestamp: req.requestTime
+        });
+    }
+    
+    res.status(500).json({
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
+        timestamp: req.requestTime
+    });
+};
+
+// Input validation middleware for POST /rescue-mission
+const validateRescueMission = (req, res, next) => {
+    const { animalType, severity } = req.body;
+    
+    if (!animalType && !severity) {
+        return res.status(400).json({
+            error: "Validation Error",
+            message: "Both animalType and severity are required",
+            timestamp: req.requestTime
+        });
+    }
+    
+    next();
+};
+
+// Main route for rescue missions
+app.post('/rescue-mission', 
+    validateRescueMission,
+    animalTypeCheck,
+    severityLevelCheck,
+    resourceAvailabilityCheck,
+    missionOutcomeDetermination,
+    (req, res) => {
+        // Check for validation errors from middleware
+        if (req.animalError) {
+            return res.status(400).json({
+                error: "Validation Error",
+                message: req.animalError,
+                timestamp: req.requestTime
+            });
+        }
+        
+        if (req.severityError) {
+            return res.status(400).json({
+                error: "Validation Error",
+                message: req.severityError,
+                timestamp: req.requestTime
+            });
+        }
+        
+        if (req.resourceError) {
+            return res.status(400).json({
+                error: "Resource Error",
+                message: req.resourceError,
+                timestamp: req.requestTime
+            });
+        }
+        
+        // Prepare response
+        const response = {
+            message: "Rescue mission processed",
+            outcome: req.missionOutcome.outcome,
+            timestamp: req.requestTime,
+            details: {
+                animalType: req.animalInfo.type,
+                severity: req.severityInfo.level,
+                missionOutcome: req.missionOutcome.outcome,
+                reason: req.missionOutcome.reason,
+                strategy: req.missionOutcome.animalStrategy,
+                precautions: req.missionOutcome.precautions,
+                difficulty: req.missionOutcome.difficulty,
+                timeEstimate: req.missionOutcome.timeEstimate,
+                resources: {
+                    required: req.resourceInfo.required,
+                    available: req.resourceInfo.available,
+                    status: req.resourceInfo.resourceStatus
+                }
+            }
+        };
+        
+        // Add success probability if available
+        if (req.missionOutcome.successProbability) {
+            response.details.successProbability = req.missionOutcome.successProbability;
+        }
+        
+        res.status(200).json(response);
+    }
+);
+
+// Route to check current resources (for monitoring)
+app.get('/resources', (req, res) => {
+    res.json({
+        currentResources: resources,
+        timestamp: req.requestTime
+    });
+});
+
+// Route to reset resources (for testing)
+app.post('/resources/reset', (req, res) => {
+    resources = {
+        teamMembers: 8,
+        vehicles: 3,
+        equipment: 15
+    };
+    
+    res.json({
+        message: "Resources reset to initial values",
+        resources,
+        timestamp: req.requestTime
+    });
+});
+
+// Apply error handler
+app.use(errorHandler);
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        error: "Not Found",
+        message: "The requested route does not exist",
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Wildlife Rescue Mission API running at http://localhost:${port}`);
+    console.log('Initial Resources:', resources);
+});
