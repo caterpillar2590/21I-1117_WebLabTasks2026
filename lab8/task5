@@ -1,0 +1,79 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Request counter middleware (from previous exercise)
+let requestCount = 0;
+
+const countRequests = (req, res, next) => {
+    requestCount++;
+    console.log(`Request #${requestCount}: ${req.method} ${req.url}`);
+    next();
+};
+
+app.use(countRequests);
+
+// 1. Create the addRequestTime middleware
+const addRequestTime = (req, res, next) => {
+    // Add current timestamp to the request object
+    req.requestTime = new Date().toISOString();
+    
+    // Optional: Also add a human-readable format
+    req.requestTimeHuman = new Date().toString();
+    
+    // Log the request time for debugging
+    console.log(`Request received at: ${req.requestTime}`);
+    
+    // Proceed to the next middleware/route handler
+    next();
+};
+
+// Apply the request time middleware globally to all routes
+app.use(addRequestTime);
+
+// 2. Create the GET /request-time route
+app.get('/request-time', (req, res) => {
+    // Access the requestTime property added by middleware
+    res.json({
+        message: `This request was received at: ${req.requestTime}`,
+        // Optional: include human-readable format
+        humanReadable: req.requestTimeHuman
+    });
+});
+
+// Additional example route to show requestTime is available everywhere
+app.get('/courses', (req, res) => {
+    res.json({
+        message: "Courses list",
+        requestedAt: req.requestTime,
+        courses: [
+            { id: 1, name: "Data Structures", seats: 30 },
+            { id: 2, name: "Operating Systems", seats: 25 }
+        ]
+    });
+});
+
+// Stats route (from previous exercise)
+app.get('/stats', (req, res) => {
+    res.json({ 
+        message: `Total API Requests: ${requestCount}`,
+        currentRequestTime: req.requestTime
+    });
+});
+
+// Error handling middleware for unsupported routes
+app.use((req, res) => {
+    res.status(404).json({ 
+        error: "Route not found",
+        requestedAt: req.requestTime 
+    });
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+    console.log('Request time middleware is active');
+});
