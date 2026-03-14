@@ -1,0 +1,268 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Request logging middleware (optional but helpful)
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
+// Initial book data
+let books = [
+    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald" },
+    { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee" },
+    { id: 3, title: "1984", author: "George Orwell" }
+];
+
+// Helper function to find book by ID
+const findBookById = (id) => {
+    return books.find(book => book.id === parseInt(id));
+};
+
+// Helper function to generate new book ID
+const generateNewId = () => {
+    return books.length > 0 ? Math.max(...books.map(book => book.id)) + 1 : 1;
+};
+
+// Validation middleware for book data
+const validateBookData = (req, res, next) => {
+    const { title, author } = req.body;
+    const errors = [];
+
+    if (!title) {
+        errors.push("Title is required");
+    } else if (typeof title !== 'string') {
+        errors.push("Title must be a string");
+    } else if (title.trim() === '') {
+        errors.push("Title cannot be empty");
+    }
+
+    if (!author) {
+        errors.push("Author is required");
+    } else if (typeof author !== 'string') {
+        errors.push("Author must be a string");
+    } else if (author.trim() === '') {
+        errors.push("Author cannot be empty");
+    }
+
+    if (errors.length > 0) {
+        return res.status(400).json({
+            error: "Validation Error",
+            details: errors
+        });
+    }
+
+    // Trim the values and add to request
+    req.validatedBook = {
+        title: title.trim(),
+        author: author.trim()
+    };
+
+    next();
+};
+
+// GET /books - View all books
+app.get('/books', (req, res) => {
+    res.json({
+        count: books.length,
+        books: books
+    });
+});
+
+// GET /books/:id - View a single book
+app.get('/books/:id', (req, res) => {
+    const bookId = parseInt(req.params.id);
+    
+    // Check if ID is valid
+    if (isNaN(bookId)) {
+        return res.status(400).json({
+            error: "Invalid ID format",
+            message: "Book ID must be a number"
+        });
+    }
+    
+    const book = findBookById(bookId);
+    
+    if (!book) {
+        return res.status(404).json({
+            error: "Book not found",
+            message: `No book found with ID: ${bookId}`
+        });
+    }
+    
+    res.json(book);
+});
+
+// POST /books - Add new book
+app.post('/books', validateBookData, (req, res) => {
+    const { title, author } = req.validatedBook;
+    
+    // Check for duplicate book (optional)
+    const existingBook = books.find(book => 
+        book.title.toLowerCase() === title.toLowerCase() && 
+        book.author.toLowerCase() === author.toLowerCase()
+    );
+    
+    if (existingBook) {
+        return res.status(400).json({
+            error: "Duplicate Book",
+            message: "This book already exists in the library"
+        });
+    }
+    
+    // Create new book
+    const newBook = {
+        id: generateNewId(),
+        title: title,
+        author: author
+    };
+    
+    books.push(newBook);
+    
+    res.status(201).json({
+        message: "Book added successfully",
+        book: newBook
+    });
+});
+
+// PUT /books/:id - Update book title or author
+app.put('/books/:id', (req, res) => {
+    const bookId = parseInt(req.params.id);
+    
+    // Check if ID is valid
+    if (isNaN(bookId)) {
+        return res.status(400).json({
+            error: "Invalid ID format",
+            message: "Book ID must be a number"
+        });
+    }
+    
+    const book = findBookById(bookId);
+    
+    if (!book) {
+        return res.status(404).json({
+            error: "Book not found",
+            message: `No book found with ID: ${bookId}`
+        });
+    }
+    
+    const { title, author } = req.body;
+    const updates = [];
+    
+    // Update title if provided
+    if (title !== undefined) {
+        if (typeof title !== 'string' || title.trim() === '') {
+            return res.status(400).json({
+                error: "Validation Error",
+                message: "Title must be a non-empty string"
+            });
+        }
+        book.title = title.trim();
+        updates.push('title');
+    }
+    
+    // Update author if provided
+    if (author !== undefined) {
+        if (typeof author !== 'string' || author.trim() === '') {
+            return res.status(400).json({
+                error: "Validation Error",
+                message: "Author must be a non-empty string"
+            });
+        }
+        book.author = author.trim();
+        updates.push('author');
+    }
+    
+    // Check if any fields were provided
+    if (updates.length === 0) {
+        return res.status(400).json({
+            error: "No Updates",
+            message: "Please provide title and/or author to update"
+        });
+    }
+    
+    res.json({
+        message: `Book updated successfully (${updates.join(', ')} updated)`,
+        book: book
+    });
+});
+
+// DELETE /books/:id - Remove book
+app.delete('/books/:id', (req, res) => {
+    const bookId = parseInt(req.params.id);
+    
+    // Check if ID is valid
+    if (isNaN(bookId)) {
+        return res.status(400).json({
+            error: "Invalid ID format",
+            message: "Book ID must be a number"
+        });
+    }
+    
+    const bookIndex = books.findIndex(book => book.id === bookId);
+    
+    if (bookIndex === -1) {
+        return res.status(404).json({
+            error: "Book not found",
+            message: `No book found with ID: ${bookId}`
+        });
+    }
+    
+    const deletedBook = books[bookIndex];
+    books.splice(bookIndex, 1);
+    
+    res.json({
+        message: "Book removed successfully",
+        deletedBook: deletedBook
+    });
+});
+
+// Additional useful route: GET /books/search?q=query - Search books
+app.get('/books/search', (req, res) => {
+    const searchQuery = req.query.q;
+    
+    if (!searchQuery) {
+        return res.status(400).json({
+            error: "Missing search query",
+            message: "Please provide a search query using ?q=your_search"
+        });
+    }
+    
+    const searchResults = books.filter(book => 
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    res.json({
+        query: searchQuery,
+        count: searchResults.length,
+        results: searchResults
+    });
+});
+
+// 404 handler for undefined routes
+app.use((req, res) => {
+    res.status(404).json({
+        error: "Route not found",
+        message: "The requested endpoint does not exist"
+    });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        error: "Internal Server Error",
+        message: "Something went wrong on the server"
+    });
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Library Book Management System running at http://localhost:${port}`);
+    console.log('Initial books:', books);
+});
