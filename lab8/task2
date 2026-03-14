@@ -1,0 +1,197 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware
+app.use(express.json());
+
+// Initial astronauts data
+let astronauts = [
+    { name: "Ayesha Khan", specialization: "Pilot", skillLevel: "Advanced" },
+    { name: "Omar Malik", specialization: "Robotics Engineer", skillLevel: "Intermediate" },
+    { name: "Elena Rodriguez", specialization: "Medical Officer", skillLevel: "Advanced" },
+    { name: "James Chen", specialization: "Systems Engineer", skillLevel: "Expert" },
+    { name: "Sarah Johnson", specialization: "Geologist", skillLevel: "Intermediate" }
+];
+
+// Store missions
+let missions = [];
+
+// Helper function to find astronaut by name
+const findAstronaut = (name) => {
+    return astronauts.find(a => a.name === name);
+};
+
+// Helper function to check if astronaut is assigned to any mission
+const isAstronautAssigned = (astronautName, excludeMission = null) => {
+    return missions.some(mission => {
+        if (excludeMission && mission.missionName === excludeMission) {
+            return false;
+        }
+        return mission.crew.includes(astronautName);
+    });
+};
+
+// Helper function to calculate mission capability score
+const calculateMissionScore = (crew) => {
+    const skillValues = {
+        "Beginner": 1,
+        "Intermediate": 2,
+        "Advanced": 3,
+        "Expert": 4
+    };
+    
+    let totalScore = 0;
+    crew.forEach(crewName => {
+        const astronaut = findAstronaut(crewName);
+        if (astronaut) {
+            totalScore += skillValues[astronaut.skillLevel] || 0;
+        }
+    });
+    
+    // Normalize score to 0-100 scale (max possible with 5 expert astronauts = 20)
+    const maxPossibleScore = astronauts.length * 4; // 5 * 4 = 20
+    const normalizedScore = Math.min(100, Math.round((totalScore / maxPossibleScore) * 100));
+    
+    return normalizedScore;
+};
+
+// 1. GET /astronauts - Return all available astronauts
+app.get('/astronauts', (req, res) => {
+    res.json(astronauts);
+});
+
+// 2. POST /missions - Create a new mission crew
+app.post('/missions', (req, res) => {
+    const { missionName, crew } = req.body;
+    
+    // Validate required fields
+    if (!missionName || !crew || !Array.isArray(crew)) {
+        return res.status(400).json({ 
+            error: "Mission name and crew array are required" 
+        });
+    }
+    
+    // Check if mission name already exists
+    const existingMission = missions.find(m => m.missionName === missionName);
+    if (existingMission) {
+        return res.status(400).json({ 
+            error: "Mission with this name already exists" 
+        });
+    }
+    
+    // Validate crew array is not empty
+    if (crew.length === 0) {
+        return res.status(400).json({ 
+            error: "Crew must contain at least one astronaut" 
+        });
+    }
+    
+    // Check for duplicate names in crew
+    const uniqueCrew = [...new Set(crew)];
+    if (uniqueCrew.length !== crew.length) {
+        return res.status(400).json({ 
+            error: "Crew list contains duplicate astronaut names" 
+        });
+    }
+    
+    // Validate each astronaut exists and is available
+    const invalidAstronauts = [];
+    const unavailableAstronauts = [];
+    
+    for (const astronautName of crew) {
+        const astronaut = findAstronaut(astronautName);
+        
+        if (!astronaut) {
+            invalidAstronauts.push(astronautName);
+        } else if (isAstronautAssigned(astronautName)) {
+            unavailableAstronauts.push(astronautName);
+        }
+    }
+    
+    if (invalidAstronauts.length > 0) {
+        return res.status(400).json({ 
+            error: "Following astronauts do not exist", 
+            astronauts: invalidAstronauts 
+        });
+    }
+    
+    if (unavailableAstronauts.length > 0) {
+        return res.status(400).json({ 
+            error: "Following astronauts are already assigned to another mission", 
+            astronauts: unavailableAstronauts 
+        });
+    }
+    
+    // Create new mission
+    const newMission = {
+        missionName,
+        crew,
+        missionCapabilityScore: calculateMissionScore(crew)
+    };
+    
+    missions.push(newMission);
+    res.status(201).json(newMission);
+});
+
+// 3. GET /missions/:missionName - Retrieve mission details
+app.get('/missions/:missionName', (req, res) => {
+    const missionName = req.params.missionName;
+    const mission = missions.find(m => m.missionName === missionName);
+    
+    if (!mission) {
+        return res.status(404).json({ 
+            error: "Mission not found" 
+        });
+    }
+    
+    res.json(mission);
+});
+
+// 4. DELETE /missions/:missionName - Cancel a mission
+app.delete('/missions/:missionName', (req, res) => {
+    const missionName = req.params.missionName;
+    const missionIndex = missions.findIndex(m => m.missionName === missionName);
+    
+    if (missionIndex === -1) {
+        return res.status(404).json({ 
+            error: "Mission not found" 
+        });
+    }
+    
+    // Remove the mission
+    missions.splice(missionIndex, 1);
+    
+    res.json({ 
+        message: `Mission "${missionName}" has been successfully cancelled.`
+    });
+});
+
+// Additional route: GET /missions - List all missions (optional, for convenience)
+app.get('/missions', (req, res) => {
+    res.json(missions);
+});
+
+// Additional route: GET /available-astronauts - List available astronauts
+app.get('/available-astronauts', (req, res) => {
+    const availableAstronauts = astronauts.filter(astronaut => 
+        !isAstronautAssigned(astronaut.name)
+    );
+    res.json(availableAstronauts);
+});
+
+// Error handling middleware for unsupported routes
+app.use((req, res) => {
+    res.status(404).json({ error: "Route not found" });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: "Something went wrong!" });
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Space Mission Crew Management System running at http://localhost:${port}`);
+});
