@@ -1,0 +1,95 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// 1. Create the request counter variable
+let requestCount = 0;
+
+// 2. Create the countRequests middleware
+const countRequests = (req, res, next) => {
+    // Increment the counter for every request
+    requestCount++;
+    console.log(`Request #${requestCount}: ${req.method} ${req.url}`);
+    // Allow the request to proceed
+    next();
+};
+
+// 3. Apply the middleware globally to count ALL requests
+app.use(countRequests);
+
+// Example routes to demonstrate the counter (from previous exercises)
+let courses = [
+    { id: 1, name: "Data Structures", seats: 30 },
+    { id: 2, name: "Operating Systems", seats: 25 }
+];
+
+// Course routes
+app.get('/courses', (req, res) => {
+    res.json(courses);
+});
+
+app.get('/courses/:id', (req, res) => {
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+    if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+    }
+    res.json(course);
+});
+
+app.post('/courses', (req, res) => {
+    const { id, name, seats } = req.body;
+    
+    if (!id || !name || seats === undefined) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+    
+    const newCourse = { id, name, seats };
+    courses.push(newCourse);
+    res.status(201).json(newCourse);
+});
+
+app.put('/courses/:id', (req, res) => {
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+    if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+    }
+    
+    const { seats } = req.body;
+    if (seats === undefined) {
+        return res.status(400).json({ error: "Missing seats field" });
+    }
+    
+    course.seats = seats;
+    res.json(course);
+});
+
+app.delete('/courses/:id', (req, res) => {
+    const courseIndex = courses.findIndex(c => c.id === parseInt(req.params.id));
+    if (courseIndex === -1) {
+        return res.status(404).json({ error: "Course not found" });
+    }
+    
+    courses.splice(courseIndex, 1);
+    res.json({ message: "Course deleted successfully" });
+});
+
+// 4. Create the /stats route
+app.get('/stats', (req, res) => {
+    res.json({ 
+        message: `Total API Requests: ${requestCount}` 
+    });
+});
+
+// Error handling middleware for unsupported routes
+app.use((req, res) => {
+    res.status(404).json({ error: "Route not found" });
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+    console.log('Request counter middleware is active');
+});
