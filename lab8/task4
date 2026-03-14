@@ -1,0 +1,123 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Request counter middleware (from previous exercise)
+let requestCount = 0;
+
+const countRequests = (req, res, next) => {
+    requestCount++;
+    console.log(`Request #${requestCount}: ${req.method} ${req.url}`);
+    next();
+};
+
+app.use(countRequests);
+
+// Store missions data
+let missions = [];
+
+// Input validation middleware for POST /missions
+const validateMission = (req, res, next) => {
+    const { missionName, crew } = req.body;
+    
+    // Check if missionName is missing or empty
+    if (!missionName || missionName.trim() === '') {
+        return res.status(400).json({ 
+            error: "Invalid Request: Required fields missing - missionName is required and cannot be empty"
+        });
+    }
+    
+    // Check if crew is missing
+    if (crew === undefined) {
+        return res.status(400).json({ 
+            error: "Invalid Request: Required fields missing - crew is required"
+        });
+    }
+    
+    // Check if crew is an array
+    if (!Array.isArray(crew)) {
+        return res.status(400).json({ 
+            error: "Invalid Request: crew must be an array"
+        });
+    }
+    
+    // Check if crew array is not empty
+    if (crew.length === 0) {
+        return res.status(400).json({ 
+            error: "Invalid Request: crew array cannot be empty"
+        });
+    }
+    
+    // Check if all crew members are strings and not empty
+    for (let i = 0; i < crew.length; i++) {
+        if (typeof crew[i] !== 'string' || crew[i].trim() === '') {
+            return res.status(400).json({ 
+                error: `Invalid Request: crew member at index ${i} must be a non-empty string`
+            });
+        }
+    }
+    
+    // Check for duplicate crew members
+    const uniqueCrew = [...new Set(crew)];
+    if (uniqueCrew.length !== crew.length) {
+        return res.status(400).json({ 
+            error: "Invalid Request: crew contains duplicate names"
+        });
+    }
+    
+    // If all validations pass, proceed to the route handler
+    next();
+};
+
+// POST /missions route with validation middleware
+app.post('/missions', validateMission, (req, res) => {
+    const { missionName, crew } = req.body;
+    
+    // Check if mission with same name already exists (additional business logic)
+    const existingMission = missions.find(m => m.missionName === missionName);
+    if (existingMission) {
+        return res.status(400).json({ 
+            error: "Mission with this name already exists"
+        });
+    }
+    
+    // Create new mission
+    const newMission = {
+        missionName,
+        crew,
+        createdAt: new Date().toISOString()
+    };
+    
+    missions.push(newMission);
+    
+    res.status(201).json({
+        message: "Mission created successfully",
+        mission: newMission
+    });
+});
+
+// GET /missions - List all missions (for testing)
+app.get('/missions', (req, res) => {
+    res.json(missions);
+});
+
+// GET /stats - Request statistics (from previous exercise)
+app.get('/stats', (req, res) => {
+    res.json({ 
+        message: `Total API Requests: ${requestCount}` 
+    });
+});
+
+// Error handling middleware for unsupported routes
+app.use((req, res) => {
+    res.status(404).json({ error: "Route not found" });
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+    console.log('Request counter and validation middleware are active');
+});
