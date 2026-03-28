@@ -732,38 +732,38 @@ mongoose.connect(MONGODB_URI, {
     useUnifiedTopology: true,
 })
 .then(() => {
-    console.log('✅ MongoDB connected successfully');
+    console.log(' MongoDB connected successfully');
     app.listen(PORT, () => {
-        console.log(`🚀 Server running on http://localhost:${PORT}`);
-        console.log(`\n📋 Available endpoints:`);
-        console.log(`\n🔐 Authentication:`);
+        console.log(` Server running on http://localhost:${PORT}`);
+        console.log(`\n Available endpoints:`);
+        console.log(`\n Authentication:`);
         console.log(`   POST   /api/auth/register           - Register new user`);
         console.log(`   POST   /api/auth/login              - Login user`);
         console.log(`   POST   /api/auth/forgot-password    - Request password reset`);
         console.log(`   POST   /api/auth/reset-password/:token - Reset password`);
         console.log(`   GET    /api/auth/me                 - Get user profile`);
-        console.log(`\n📹 Content Management:`);
+        console.log(`\n Content Management:`);
         console.log(`   POST   /api/content                 - Create content (Creator/Admin)`);
         console.log(`   GET    /api/content                 - List content (Role-based)`);
         console.log(`   GET    /api/content/:id             - Get content by ID`);
         console.log(`   PUT    /api/content/:id             - Update content (Creator/Admin)`);
         console.log(`   DELETE /api/content/:id             - Delete content (Admin only)`);
-        console.log(`\n👑 Admin Routes:`);
+        console.log(`\n Admin Routes:`);
         console.log(`   GET    /api/content/admin           - Admin panel (Admin only)`);
         console.log(`   GET    /api/admin/dashboard         - Admin dashboard with stats`);
-        console.log(`\n🎨 Creator Routes:`);
+        console.log(`\n Creator Routes:`);
         console.log(`   GET    /api/creator/my-content      - Get creator's content`);
     });
 })
 .catch((error) => {
-    console.error('❌ MongoDB connection error:', error);
+    console.error(' MongoDB connection error:', error);
     process.exit(1);
 });
 
 // Handle graceful shutdown
 process.on('SIGINT', async () => {
     await mongoose.connection.close();
-    console.log('\n📴 MongoDB connection closed');
+    console.log('\n MongoDB connection closed');
     process.exit(0);
 });
 
