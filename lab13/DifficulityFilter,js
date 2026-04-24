@@ -1,0 +1,28 @@
+// components/DifficultyFilter.js
+import React from 'react';
+
+function DifficultyFilter({ selectedDifficulty, setSelectedDifficulty }) {
+  const difficulties = ['Easy', 'Medium', 'Hard'];
+  
+  return (
+    <div className="filter-dropdown">
+      <label>Difficulty:</label>
+      <select 
+        value={selectedDifficulty} 
+        onChange={(e) => setSelectedDifficulty(e.target.value)}
+      >
+        <option value="">All Levels</option>
+        {difficulties.map(difficulty => (
+          <option key={difficulty} value={difficulty}>{difficulty}</option>
+        ))}
+      </select>
+      {selectedDifficulty && (
+        <button onClick={() => setSelectedDifficulty('')} className="clear-filter">
+          ✕
+        </button>
+      )}
+    </div>
+  );
+}
+
+export default DifficultyFilter;
